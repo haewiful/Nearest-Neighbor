@@ -2,8 +2,8 @@ import pandas as pd
 import sys
 import math
 
-
 def calc_distance(t_index, index, feature_set):
+    # print(feature_set)
     test = data.loc[t_index]
     row = data.loc[index]
 
@@ -12,16 +12,8 @@ def calc_distance(t_index, index, feature_set):
     for i in feature_set:
         test_feat.append(test[i])
         row_feat.append(row[i])
-    # for ind in range(1, f_num+1):
-    #     print(test.loc[ind], end=', ')
-    # print()
-    # for ind in range(1, f_num+1):
-    #     print(row.loc[ind], end=', ')
-    # print()
     distance = math.dist(test_feat, row_feat)
-    # print(f"{index} : {distance}")
     return distance
-    # distance = math.dist(test)
 
 def set_to_string(f_set):
     tmp = "{"
@@ -29,27 +21,43 @@ def set_to_string(f_set):
         tmp += str(x) + ","
     return tmp[:-1] + "}"
 
+# def classify(wrapper):
+#     feature = [[x] for x in range(1, len(data.loc[0]))]
+#     if wrapper == 1: # forward selection
 
-# read data file
-# data = pd.read_csv('CS205_small_Data__27.txt', sep='  ', engine='python')
-# data = pd.read_csv('test1.txt', header=None, sep='  ', engine='python')
-data = pd.read_csv('test3.txt', header=None, sep='  ', engine='python')
-# print(data.to_string())
+#     else: # backward elimination
 
 # print(len(data)) # row num
 # print(len(data.loc[0])) # col num
 
-# print(type(data.loc[0]))
+print("Welcome to Bertie Woosters Feature Selection Algorithm")
+filename = input("Type in the name of the file to test: ")
+
+# read data file
+# data = pd.read_csv('CS205_small_Data__27.txt', sep='  ', engine='python')
+data = pd.read_csv('test3.txt', header=None, sep='  ', engine='python')
+# data = pd.read_csv(filename, header=None, sep='  ', engine='python')
+
+print("Type the number of the algorithm you want to run.\n")
+
+print("\t1) Forward Selection")
+print("\t2) Backward Elimination\n")
+
+selection = int(input())
+
+print(f"This dataset has {len(data.loc[0])-1} features (not including the class attribute), with {len(data)} instances\n")
+
 
 # run on all features
 
 # start searching
 
+# get all possible combination of features
 features = [[x] for x in range(1, len(data.loc[0]))]
 previous=[[x] for x in range(1, len(data.loc[0]))]
 # print(previous)
 for _ in range(2, len(data.loc[0])):
-    prev_tmp = []
+    prev_tmp = []   
     for cur_set in previous:
         # print(cur_set)
         for i in range(1, len(data.loc[0])):
@@ -61,7 +69,7 @@ for _ in range(2, len(data.loc[0])):
                     features.append(tmp)
     previous = prev_tmp
 
-
+# print(f"""Running nearest neighbor with all {len(data.loc[0])-1} features, using "leaving-one-out" evalutaion, I get an accuracy of {accuracy:.1f}%""")
 print("Begin search.\n")
 
 feature_num=1
@@ -71,14 +79,16 @@ max_accuracy_set=0
 max_accuracy_local=0
 
 for cur_feature in features:
-
     # update features
     if feature_num != len(cur_feature):
+        print()
         if max_accuracy_local > max_accuracy_set:
             max_accuracy_set = max_accuracy_local
             max_feature_set = max_feature_local
+        else:
+            print("(Warning, Accuracy has decreased! Continuing search in case of local maxima)")
         
-        print("\nFeature set ", end="")
+        print("Feature set ", end="")
         print(set_to_string(max_feature_local), end="")
         print(" was best, ", end='')
         print(f"accuracy is {max_accuracy_local:.1f}%\n")
@@ -106,7 +116,6 @@ for cur_feature in features:
                 min_distance = distance
                 min_index = index
         # check accuracy
-        # print(f"nearest - {min_index} : {min_distance}")
         if test_row[0] == data.loc[min_index][0]:
             # print(f"same class of {test_row[0]} == {data.loc[min_index][0]}")
             correct_count+=1
